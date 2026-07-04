@@ -707,17 +707,57 @@ type RowConstraint = {
 
 ---
 
-## 6. Ce qui marche, ce qui ne marche pas, ce qui manque
+## 6. Interface utilisateur (Frontend)
 
-*(Section à compléter au fil du développement — honnêteté attendue sur l'état réel du projet à la date de rendu.)*
+### Principe général
 
-- ✅ À documenter au fur et à mesure
-- ⚠️ À documenter au fur et à mesure
-- ❌ À documenter au fur et à mesure
+DataFlow CI est un outil de travail interne (pas un site vitrine) : les personnes qui l'utilisent y reviennent tous les jours pour déposer des fichiers et vérifier des statuts. L'interface privilégie donc la **clarté et la rapidité de lecture** plutôt que l'esthétique décorative.
+
+### Palette de couleurs
+
+Une palette sobre (fond gris très clair, texte presque noir, un seul bleu comme couleur d'action) plutôt que des couleurs vives partout — pour que l'attention se porte sur les **statuts**, qui sont l'information la plus importante de l'outil.
+
+| Usage | Couleur | Pourquoi |
+|---|---|---|
+| Fond de page | Gris très clair (`#f8fafc`) | Repose l'œil sur de longues sessions d'utilisation |
+| Actions principales (boutons) | Bleu (`#2563eb`) | Une seule couleur d'action, cohérente avec le bleu déjà utilisé dans les diagrammes du DESIGN.md |
+| Statuts des fichiers | Une couleur dédiée par statut (gris = en attente, bleu = en cours, vert = validé, orange = partiel, rouge = échoué) | Reconnaissable en un coup d'œil, sans avoir à lire le texte — utile quand on scanne une longue liste de fichiers |
+
+### Pourquoi peu d'émoticônes/emoji dans l'interface
+
+Un utilisateur qui consulte ce dashboard plusieurs fois par jour doit pouvoir distinguer un fichier "échoué" d'un fichier "validé" **instantanément**, sans effort de lecture. Les couleurs et une petite pastille suffisent à coder cette information de façon fiable et professionnelle. Les emoji sont réservés à des contextes ponctuels (documentation, messages d'erreur), pas à l'interface elle-même, pour garder un ton sérieux adapté à un outil utilisé par une équipe.
+
+### Disposition (layout)
+
+Une barre latérale (sidebar) fixe à gauche avec 3 entrées (Tableau de bord, Sources, Fichiers), et le contenu principal à droite. C'est la disposition la plus reconnaissable pour ce type d'outil : elle permet de toujours savoir où on est et de changer d'écran en un clic, sans naviguer dans des menus imbriqués.
+
+### États vides pensés comme une aide
+
+Plutôt que d'afficher un tableau vide sans explication quand il n'y a encore aucune source ou aucun fichier, chaque liste vide explique **ce que l'utilisateur peut faire** ensuite (ex : "Crée ta première source" avec un bouton direct). Un écran vide est une occasion d'orienter l'utilisateur, pas juste l'absence de contenu.
+
+### Structure technique
+
+| Dossier | Contenu |
+|---|---|
+| `src/styles/tokens.css` | Toutes les couleurs, tailles de texte et espacements centralisés en variables CSS — un seul endroit à modifier pour ajuster tout le design |
+| `src/components/` | Composants réutilisés partout (`Button`, `StatusBadge`, `EmptyState`, `AppLayout`) pour éviter de dupliquer les styles |
+| `src/pages/` | Une page par écran (Connexion, Tableau de bord, Sources, Fichiers) |
+| `src/types/` | Types TypeScript qui reflètent exactement le schéma Prisma du backend, pour éviter les incohérences entre front et back |
 
 ---
 
-## 7. Trade-offs assumés
+## 7. Ce qui marche, ce qui ne marche pas, ce qui manque
+
+*(Section à compléter au fil du développement — honnêteté attendue sur l'état réel du projet à la date de rendu.)*
+
+- ✅ Structure du backend (Express + Prisma + squelette worker BullMQ)
+- ✅ Structure du frontend (routing, design system, pages avec données de test)
+- ⚠️ Les pages du frontend utilisent des données factices (`MOCK_...`) en attendant que les routes API du backend soient implémentées
+- ❌ Authentification, CRUD des sources, moteur de validation, dashboard connecté aux vraies données — à venir
+
+---
+
+## 8. Trade-offs assumés
 
 - **Colonnes en JSON plutôt qu'en collection séparée** : gain de flexibilité et de simplicité, au prix d'une validation applicative (pas de contrainte de structure imposée par la base elle-même).
 - **MongoDB plutôt que PostgreSQL** : les entités (Source → Schema → Upload → Erreurs) ont des relations assez simples (un-vers-plusieurs) que Prisma gère par référence même en NoSQL ; en échange, on perd les contraintes d'intégrité référentielle strictes d'un SGBD relationnel (rien n'empêche nativement une référence orpheline si une `Source` est supprimée), et Prisma est moins mature sur MongoDB que sur SQL (moins de documentation, requêtes avancées plus limitées).
@@ -730,7 +770,7 @@ type RowConstraint = {
 
 ---
 
-## 8. Next steps (si 2 semaines de plus)
+## 9. Next steps (si 2 semaines de plus)
 
 - Gestion de rôles multi-utilisateurs par organisation (multi-tenant)
 - Webhooks sortants à la validation d'un fichier

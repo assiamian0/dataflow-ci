@@ -1,0 +1,56 @@
+.status-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-1) var(--space-3);
+  border-radius: var(--radius-lg);
+  font-size: var(--font-size-sm);
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+.status-badge__dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+}
+
+.status-badge--pending {
+  color: var(--color-status-pending);
+  background-color: var(--color-status-pending-bg);
+}
+.status-badge--pending .status-badge__dot {
+  background-color: var(--color-status-pending);
+}
+
+.status-badge--processing {
+  color: var(--color-status-processing);
+  background-color: var(--color-status-processing-bg);
+}
+.status-badge--processing .status-badge__dot {
+  background-color: var(--color-status-processing);
+}
+
+.status-badge--success {
+  color: var(--color-status-success);
+  background-color: var(--color-status-success-bg);
+}
+.status-badge--success .status-badge__dot {
+  background-color: var(--color-status-success);
+}
+
+.status-badge--partial {
+  color: var(--color-status-partial);
+  background-color: var(--color-status-partial-bg);
+}
+.status-badge--partial .status-badge__dot {
+  background-color: var(--color-status-partial);
+}
+
+.status-badge--failed {
+  color: var(--color-status-failed);
+  background-color: var(--color-status-failed-bg);
+}
+.status-badge--failed .status-badge__dot {
+  background-color: var(--color-status-failed);
+}
