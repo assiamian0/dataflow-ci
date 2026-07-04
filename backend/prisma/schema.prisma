@@ -1,0 +1,134 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mongodb"
+  url      = env("DATABASE_URL")
+}
+
+// ─────────────────────────────────────────
+// USER
+// ─────────────────────────────────────────
+model User {
+  id         String   @id @default(auto()) @map("_id") @db.ObjectId
+  email      String   @unique
+  password   String
+  name       String?
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+
+  sources    Source[]
+}
+
+// ─────────────────────────────────────────
+// SOURCE
+// ─────────────────────────────────────────
+model Source {
+  id                 String   @id @default(auto()) @map("_id") @db.ObjectId
+  source_id          String   @unique // "ventes-orange-ci"
+  name               String
+  description        String?
+  owner              String?
+  expected_frequency String?  // "weekly" | "daily"
+  file_format        String   @default("csv")
+  delimiter          String   @default(",")
+  encoding           String   @default("utf-8")
+  has_header         Boolean  @default(true)
+  created_at         DateTime @default(now())
+  updated_at         DateTime @updatedAt
+
+  user_id    String   @db.ObjectId
+  user       User     @relation(fields: [user_id], references: [id])
+
+  schemas    SourceSchema[]
+  uploads    FileUpload[]
+}
+
+// ─────────────────────────────────────────
+// SOURCE SCHEMA (versionné)
+// ─────────────────────────────────────────
+model SourceSchema {
+  id              String   @id @default(auto()) @map("_id") @db.ObjectId
+  version         Int      @default(1)
+  is_active       Boolean  @default(true)
+
+  // colonnes + contraintes stockées en JSON
+  columns         Json
+  row_constraints Json?
+
+  created_at      DateTime @default(now())
+
+  source_id  String @db.ObjectId
+  source     Source @relation(fields: [source_id], references: [id])
+
+  uploads    FileUpload[]
+
+  @@unique([source_id, version])
+}
+
+// ─────────────────────────────────────────
+// FILE UPLOAD
+// ─────────────────────────────────────────
+model FileUpload {
+  id              String   @id @default(auto()) @map("_id") @db.ObjectId
+  filename        String   // nom unique généré
+  original_name   String   // nom original du fichier
+  file_path       String   // chemin fichier original
+  valid_file_path String?  // chemin CSV lignes valides
+
+  status          UploadStatus @default(PENDING)
+
+  total_lines     Int      @default(0)
+  valid_lines     Int      @default(0)
+  invalid_lines   Int      @default(0)
+
+  created_at      DateTime @default(now())
+  updated_at      DateTime @updatedAt
+
+  source_id   String       @db.ObjectId
+  source      Source       @relation(fields: [source_id], references: [id])
+
+  schema_id   String       @db.ObjectId
+  schema      SourceSchema @relation(fields: [schema_id], references: [id])
+
+  errors      IngestionError[]
+}
+
+// ─────────────────────────────────────────
+// INGESTION ERROR
+// ─────────────────────────────────────────
+model IngestionError {
+  id          String    @id @default(auto()) @map("_id") @db.ObjectId
+  line_number Int
+  column_name String
+  value       String?   // valeur reçue (null si champ manquant)
+  reason      String    // explication claire pour l'utilisateur
+  error_type  ErrorType
+
+  upload_id   String     @db.ObjectId
+  upload      FileUpload @relation(fields: [upload_id], references: [id])
+}
+
+// ─────────────────────────────────────────
+// ENUMS
+// ─────────────────────────────────────────
+enum UploadStatus {
+  PENDING
+  PROCESSING
+  SUCCESS
+  PARTIAL
+  FAILED
+}
+
+enum ErrorType {
+  REQUIRED
+  TYPE
+  FORMAT
+  PATTERN
+  ENUM
+  RANGE
+  LENGTH
+  DUPLICATE
+  CONSTRAINT
+}

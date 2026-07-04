@@ -1,0 +1,26 @@
+# Dépendances
+node_modules/
+
+# Build
+dist/
+
+# Environnement
+.env
+.env.local
+
+# Fichiers uploadés (stockage local, ne doit pas être versionné)
+uploads/*
+!uploads/.gitkeep
+
+# Logs
+*.log
+npm-debug.log*
+
+# Éditeurs / OS
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+
+# Prisma
+prisma/dev.db
