@@ -33,6 +33,7 @@ const VENTES_ORANGE: SourceDefinitionInput = {
   ],
   row_constraints: [
     {
+      type: 'unique',
       name: 'unique_per_day_per_client',
       description: 'Un même client ne doit apparaître qu\'une fois par jour',
       columns: ['date_vente', 'client_id'],
