@@ -27,6 +27,24 @@ export interface ColumnSchema {
   max_length?: number
 }
 
+export type ComparisonOperator = '<=' | '<' | '>=' | '>' | '=='
+
+export type RowConstraint =
+  | {
+      type: 'unique'
+      name: string
+      description?: string
+      columns: string[]
+    }
+  | {
+      type: 'comparison'
+      name: string
+      description?: string
+      column_a: string
+      operator: ComparisonOperator
+      column_b: string
+    }
+
 export interface Source {
   id: string
   source_id: string
@@ -48,6 +66,7 @@ export interface SourceSchema {
   version: number
   is_active: boolean
   columns: ColumnSchema[]
+  row_constraints?: RowConstraint[]
   created_at: string
 }
 
