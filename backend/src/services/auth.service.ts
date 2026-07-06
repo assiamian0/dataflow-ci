@@ -34,7 +34,8 @@ export async function verifyCredentials(email: string, password: string) {
 }
 
 export function generateToken(userId: string) {
-  return jwt.sign({ userId }, env.jwtSecret, { expiresIn: env.jwtExpiresIn })
+  const options: jwt.SignOptions = { expiresIn: env.jwtExpiresIn as jwt.SignOptions['expiresIn'] }
+  return jwt.sign({ userId }, env.jwtSecret, options)
 }
 
 export function verifyToken(token: string): { userId: string } {
