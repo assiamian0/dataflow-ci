@@ -1,4 +1,5 @@
 import { NavLink, Outlet } from 'react-router-dom'
+import { useAuth } from '@/hooks/useAuth'
 import './AppLayout.css'
 
 const NAV_ITEMS = [
@@ -8,6 +9,8 @@ const NAV_ITEMS = [
 ]
 
 export function AppLayout() {
+  const { logout } = useAuth()
+
   return (
     <div className="app-layout">
       <aside className="app-sidebar">
@@ -31,6 +34,9 @@ export function AppLayout() {
       <div className="app-main">
         <header className="app-topbar">
           <span className="app-topbar__title">Espace de travail</span>
+          <button className="app-topbar__logout" onClick={logout}>
+            Se déconnecter
+          </button>
         </header>
         <main className="app-content">
           <Outlet />

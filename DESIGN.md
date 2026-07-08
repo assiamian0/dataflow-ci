@@ -684,12 +684,24 @@ type ColumnSchema = {
   allowed_values?: string[]
 }
 
-type RowConstraint = {
-  name: string
-  description: string
-  columns?: string[]     // colonnes concernées par l'unicité
-}
+type RowConstraint =
+  | {
+      type: 'unique'
+      name: string
+      description?: string
+      columns: string[]        // combinaison de colonnes qui ne doit pas se répéter
+    }
+  | {
+      type: 'comparison'
+      name: string
+      description?: string
+      column_a: string
+      operator: '<=' | '<' | '>=' | '>' | '=='
+      column_b: string         // relation entre deux colonnes de la MÊME ligne
+    }
 ```
+
+Ce typage a été choisi après un blocage rencontré en concevant les contraintes : une règle comme "un client ne doit apparaître qu'une fois par jour" (unicité, porte sur plusieurs lignes) et une règle comme "la livraison doit être après la vente" (comparaison, porte sur deux colonnes d'une même ligne) n'ont pas la même nature. Les stocker toutes les deux comme une description en texte libre aurait rendu leur exécution automatique impossible pour le moteur de validation. Le champ `type` explicite permet au code de savoir directement quelle logique appliquer, sans avoir à "comprendre" une phrase en français.
 
 ### 5.9 Cas limites couverts par le modèle
 
@@ -699,7 +711,8 @@ type RowConstraint = {
 | Délimiteur par source | `delimiter` dans `Source` |
 | Format date par colonne | `format` dans `columns` (JSON) |
 | Colonnes optionnelles | `required: false` |
-| Contraintes cross-lignes (doublons, unicité) | `row_constraints` dans `SourceSchema` |
+| Contraintes cross-lignes (doublons, unicité) | `row_constraints` de type `unique` |
+| Contraintes cross-colonnes (ordre entre deux valeurs) | `row_constraints` de type `comparison` |
 | Export lignes valides | `valid_file_path` dans `FileUpload` |
 | Détail erreurs ligne par ligne | `IngestionError` |
 | Statuts de traitement | `status` (enum `UploadStatus`) dans `FileUpload` |
@@ -707,7 +720,30 @@ type RowConstraint = {
 
 ---
 
-## 6. Interface utilisateur (Frontend)
+## 6. Moteur de validation
+
+### Principe
+
+Pour chaque fichier uploadé, le moteur (`validation.service.ts`, exécuté dans le worker BullMQ) applique deux passes successives :
+
+1. **Validation colonne par colonne** — pour chaque ligne, chaque colonne est vérifiée selon son `type` (obligatoire, format de date, regex, min/max, valeurs autorisées...). Une ligne peut accumuler plusieurs erreurs si plusieurs colonnes sont invalides.
+2. **Validation des contraintes cross-lignes/cross-colonnes** — appliquée sur l'ensemble du fichier une fois la première passe terminée : détection des doublons (`type: 'unique'`) et vérification des relations d'ordre entre deux colonnes (`type: 'comparison'`).
+
+Une ligne est considérée **valide** seulement si elle n'a **aucune** erreur des deux passes. Les lignes valides sont réassemblées dans un nouveau CSV (`valid_file_path`), les erreurs sont enregistrées individuellement (`IngestionError`), et le statut du `FileUpload` est calculé : `SUCCESS` (aucune erreur), `PARTIAL` (certaines lignes invalides) ou `FAILED` (aucune ligne valide).
+
+### Décision assumée : contrainte d'unicité et colonne optionnelle absente
+
+Cas limite identifié en cours de conception : une contrainte d'unicité peut porter sur une colonne optionnelle (`required: false`). Si cette colonne est absente sur plusieurs lignes, faut-il considérer ces lignes comme des doublons entre elles ?
+
+**Choix retenu** : une ligne est ignorée pour une contrainte d'unicité donnée si l'une des colonnes qu'elle utilise est vide sur cette ligne. Une valeur absente n'est donc jamais considérée comme un doublon. C'est un choix pragmatique, documenté ici pour pouvoir être remis en question si le besoin métier réel s'avère différent.
+
+### Limite connue : CSV uniquement
+
+Le moteur ne lit actuellement que des fichiers CSV (via `csv-parse`). Les fichiers Excel (`.xlsx`/`.xls`) sont acceptés par le filtre d'upload (multer) mais échoueront à l'étape de lecture — voir section "Next steps".
+
+---
+
+## 7. Interface utilisateur (Frontend)
 
 ### Principe général
 
@@ -746,18 +782,33 @@ Plutôt que d'afficher un tableau vide sans explication quand il n'y a encore au
 
 ---
 
-## 7. Ce qui marche, ce qui ne marche pas, ce qui manque
+## 8. Ce qui marche, ce qui ne marche pas, ce qui manque
 
 *(Section à compléter au fil du développement — honnêteté attendue sur l'état réel du projet à la date de rendu.)*
 
-- ✅ Structure du backend (Express + Prisma + squelette worker BullMQ)
-- ✅ Structure du frontend (routing, design system, pages avec données de test)
-- ⚠️ Les pages du frontend utilisent des données factices (`MOCK_...`) en attendant que les routes API du backend soient implémentées
-- ❌ Authentification, CRUD des sources, moteur de validation, dashboard connecté aux vraies données — à venir
+**✅ Fonctionne**
+- Authentification : inscription, connexion (JWT), route protégée `/me`
+- CRUD des sources : création avec schéma initial, listing, détail
+- Versionnement du schéma : création d'une nouvelle version sans casser l'historique, historique consultable, ancienne version désactivée automatiquement (transaction Prisma)
+- Upload de fichiers CSV (multer) avec traitement asynchrone (BullMQ + Redis)
+- Moteur de validation : vérification colonne par colonne (type, format, pattern, min/max, enum, obligatoire) + contraintes cross-lignes (unicité) et cross-colonnes (comparaison)
+- Export du CSV des lignes valides, rapport d'erreurs détaillé par ligne
+- Frontend : connexion réelle, protection de toutes les routes (redirection si non connecté), déconnexion, formulaire de création de source avec colonnes et contraintes dynamiques, modification du schéma avec formulaire pré-rempli
+
+**⚠️ Partiellement fonctionnel**
+- Le frontend consomme les vraies routes pour l'auth et les sources ; la page "Fichiers" (upload côté interface) affiche encore des données factices, l'upload réel n'y est pas branché
+- Le tableau de bord (`DashboardPage`) est un squelette avec des statistiques à zéro, pas encore connecté à de vraies données
+
+**❌ Pas encore fait**
+- Upload de fichiers Excel (`.xlsx`/`.xls`) — seul le CSV est lu par le moteur de validation actuellement
+- Dashboard connecté aux vraies données, visualisations
+- Notifications, webhooks sortants, multi-tenant (bonus du brief)
+- Tests automatisés
+- Déploiement réel (Vercel / Render / Atlas configurés en local pour l'instant, pas encore mis en ligne)
 
 ---
 
-## 8. Trade-offs assumés
+## 9. Trade-offs assumés
 
 - **Colonnes en JSON plutôt qu'en collection séparée** : gain de flexibilité et de simplicité, au prix d'une validation applicative (pas de contrainte de structure imposée par la base elle-même).
 - **MongoDB plutôt que PostgreSQL** : les entités (Source → Schema → Upload → Erreurs) ont des relations assez simples (un-vers-plusieurs) que Prisma gère par référence même en NoSQL ; en échange, on perd les contraintes d'intégrité référentielle strictes d'un SGBD relationnel (rien n'empêche nativement une référence orpheline si une `Source` est supprimée), et Prisma est moins mature sur MongoDB que sur SQL (moins de documentation, requêtes avancées plus limitées).
@@ -767,14 +818,19 @@ Plutôt que d'afficher un tableau vide sans explication quand il n'y a encore au
 - **MongoDB Atlas M0 (tier gratuit)** : 512 Mo de stockage permanent, suffisant pour le MVP, mais sans sauvegardes automatiques — acceptable pour un challenge sans données critiques à protéger sur la durée.
 - **Stockage fichiers en local plutôt que S3** : simplifie le MVP, mais ne serait pas adapté à un vrai passage en production multi-instance.
 - **Pas de gestion de rôles** : accélère le développement du MVP au prix d'un modèle d'autorisation simpliste.
+- **CSV uniquement pour le moteur de validation** : couvre les samples fournis et la majorité des cas réels du brief, au prix de ne pas encore supporter les fichiers Excel malgré que le brief les autorise explicitement.
+- **Contrainte d'unicité ignorée si une colonne optionnelle est absente** : évite de générer de faux doublons quand une donnée facultative manque sur plusieurs lignes, au prix d'un risque de ne pas détecter un vrai doublon métier dans ce cas précis. Choix documenté et réversible si le besoin réel diffère.
+- **Contraintes typées (`unique`/`comparison`) plutôt qu'une description en texte libre** : plus de code à écrire côté validateur (union discriminée zod), mais rend les contraintes réellement exécutables par le moteur de validation, ce qu'un texte libre ne permettait pas.
 
 ---
 
-## 9. Next steps (si 2 semaines de plus)
+## 10. Next steps (si 2 semaines de plus)
 
+- Support des fichiers Excel dans le moteur de validation
 - Gestion de rôles multi-utilisateurs par organisation (multi-tenant)
 - Webhooks sortants à la validation d'un fichier
 - Notifications (email/in-app) de fin de traitement
 - Migration du stockage fichiers vers S3-compatible
+- Brancher le frontend "Fichiers" sur les vraies routes d'upload, et le dashboard sur de vraies statistiques
 - Passage à un plan payant sur Render pour éviter la mise en veille du service (et donc du worker BullMQ)
 - Tests d'intégration plus poussés sur les cas limites (fichiers corrompus, doublons, race conditions)

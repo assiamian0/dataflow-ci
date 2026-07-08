@@ -5,6 +5,8 @@ import { errorHandler, notFoundHandler } from './middlewares/errorHandler'
 import { authRouter } from './routes/auth.routes'
 import { healthRouter } from './routes/health.routes'
 import { sourceRouter } from './routes/source.routes' 
+import { uploadRouter } from './routes/upload.routes' 
+
 
 export const app = express()
 
@@ -15,9 +17,10 @@ app.use(express.json())
 app.use('/api/health', healthRouter)
 app.use('/api/auth', authRouter)
 app.use('/api/sources', sourceRouter)
+app.use('/api/uploads', uploadRouter)
+
 
 // TODO: brancher les routes métier au fur et à mesure
-// app.use('/api/uploads', uploadsRouter)
 // app.use('/api/dashboard', dashboardRouter)
 
 app.use(notFoundHandler)

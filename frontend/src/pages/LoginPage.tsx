@@ -1,10 +1,12 @@
 import { type FormEvent, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Button } from '@/components/Button'
+import { useAuth } from '@/hooks/useAuth'
 import './LoginPage.css'
 
 export function LoginPage() {
   const navigate = useNavigate()
+  const { login } = useAuth()
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [error, setError] = useState<string | null>(null)
@@ -16,11 +18,10 @@ export function LoginPage() {
     setIsSubmitting(true)
 
     try {
-      // TODO: brancher sur POST /api/auth/login une fois l'endpoint prêt
-      await new Promise((resolve) => setTimeout(resolve, 400))
-      navigate('/')
-    } catch {
-      setError('Email ou mot de passe incorrect.')
+      await login(email, password)
+      navigate('/', { replace: true })
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Email ou mot de passe incorrect.')
     } finally {
       setIsSubmitting(false)
     }

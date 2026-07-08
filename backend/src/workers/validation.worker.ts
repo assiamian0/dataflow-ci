@@ -1,20 +1,13 @@
 import { Worker } from 'bullmq'
+import { VALIDATION_QUEUE_NAME, type ValidationJobData } from '../config/queue'
 import { redisConnection } from '../config/redis'
+import { processFileUpload } from '../services/upload.service'
 
-// TODO: implémenter processFile() dans un service dédié (validation.service.ts)
-// et l'appeler ici avec job.data.uploadId.
-
-export const validationWorker = new Worker(
-  'validation',
+export const validationWorker = new Worker<ValidationJobData>(
+  VALIDATION_QUEUE_NAME,
   async (job) => {
     console.log(`Traitement du job ${job.id} — uploadId: ${job.data.uploadId}`)
-    // À implémenter :
-    // 1. Récupérer le FileUpload + la Source + le SourceSchema actif
-    // 2. Lire le fichier CSV depuis file_path
-    // 3. Valider chaque ligne selon les colonnes du schéma
-    // 4. Enregistrer les IngestionError
-    // 5. Générer le CSV des lignes valides
-    // 6. Mettre à jour le statut du FileUpload
+    await processFileUpload(job.data.uploadId)
   },
   { connection: redisConnection }
 )
