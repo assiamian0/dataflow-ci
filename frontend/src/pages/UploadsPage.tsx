@@ -1,5 +1,6 @@
 import { useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
+import { api } from '@/api/client'
 import { Button } from '@/components/Button'
 import { EmptyState } from '@/components/EmptyState'
 import { StatusBadge } from '@/components/StatusBadge'
@@ -166,6 +167,7 @@ export function UploadsPage() {
               <th>Statut</th>
               <th>Lignes valides / totales</th>
               <th>Reçu le</th>
+              <th></th>
             </tr>
           </thead>
           <tbody>
@@ -183,6 +185,18 @@ export function UploadsPage() {
                   {upload.valid_lines} / {upload.total_lines}
                 </td>
                 <td>{new Date(upload.created_at).toLocaleString('fr-FR')}</td>
+                <td>
+                  {upload.valid_file_path && (
+                    <Button
+                      variant="secondary"
+                      onClick={() =>
+                        api.download(`/api/uploads/${upload.id}/download`, `valides-${upload.original_name}`)
+                      }
+                    >
+                      Télécharger
+                    </Button>
+                  )}
+                </td>
               </tr>
             ))}
           </tbody>

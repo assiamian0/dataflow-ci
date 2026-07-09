@@ -79,6 +79,7 @@ export interface FileUpload {
   total_lines: number
   valid_lines: number
   invalid_lines: number
+  valid_file_path?: string | null
   created_at: string
   updated_at: string
 }

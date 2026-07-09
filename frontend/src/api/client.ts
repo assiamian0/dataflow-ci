@@ -1,4 +1,4 @@
-const API_URL = import.meta.env.VITE_API_URL ?? 'http://localhost:4040'
+const API_URL = import.meta.env.VITE_API_URL ?? 'http://localhost:4000'
 
 function getToken(): string | null {
   return localStorage.getItem('dataflow_token')
@@ -35,4 +35,23 @@ export const api = {
   patch: <T>(path: string, data?: unknown) =>
     request<T>(path, { method: 'PATCH', body: data ? JSON.stringify(data) : undefined }),
   delete: <T>(path: string) => request<T>(path, { method: 'DELETE' }),
+
+  /** Télécharge un fichier protégé par auth et déclenche le téléchargement navigateur. */
+  async download(path: string, filename: string) {
+    const token = getToken()
+    const response = await fetch(`${API_URL}${path}`, {
+      headers: token ? { Authorization: `Bearer ${token}` } : {},
+    })
+    if (!response.ok) {
+      const body = await response.json().catch(() => ({ error: 'Erreur inconnue' }))
+      throw new Error(body.error ?? `Erreur ${response.status}`)
+    }
+    const blob = await response.blob()
+    const url = URL.createObjectURL(blob)
+    const link = document.createElement('a')
+    link.href = url
+    link.download = filename
+    link.click()
+    URL.revokeObjectURL(url)
+  },
 }
