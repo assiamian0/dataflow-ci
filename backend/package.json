@@ -11,6 +11,8 @@
     "worker:start": "node dist/workers/validation.worker.js",
     "prisma:generate": "prisma generate",
     "prisma:push": "prisma db push",
+    "prisma:seed": "tsx prisma/seed.ts",
+    "prisma:seed2": "tsx prisma/seed2.ts",
     "lint": "eslint src --ext .ts",
     "test": "vitest run"
   },
@@ -18,7 +20,7 @@
   "license": "MIT",
   "dependencies": {
     "@prisma/client": "^5.20.0",
-    "bcrypt": "^5.1.1",
+    "bcryptjs": "^2.4.3",
     "bullmq": "^5.12.0",
     "cors": "^2.8.5",
     "csv-parse": "^5.5.6",
@@ -27,11 +29,12 @@
     "express": "^4.21.0",
     "ioredis": "^5.4.1",
     "jsonwebtoken": "^9.0.2",
-    "multer": "^1.4.5-lts.1",
+    "multer": "^2.0.0",
+    "resend": "^4.0.0",
     "zod": "^3.23.8"
   },
   "devDependencies": {
-    "@types/bcrypt": "^5.0.2",
+    "@types/bcryptjs": "^2.4.6",
     "@types/cors": "^2.8.17",
     "@types/express": "^4.17.21",
     "@types/jsonwebtoken": "^9.0.7",
@@ -41,5 +44,8 @@
     "tsx": "^4.19.1",
     "typescript": "^5.6.2",
     "vitest": "^2.1.1"
+  },
+  "overrides": {
+    "ioredis": "^5.4.1"
   }
 }

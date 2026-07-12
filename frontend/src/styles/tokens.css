@@ -1,0 +1,101 @@
+/*
+  Design tokens — DataFlow CI
+
+  Direction : outil interne de suivi de données, pas une vitrine.
+  Priorité : lisibilité, densité d'information maîtrisée, statuts
+  reconnaissables au premier coup d'œil (le fichier a-t-il réussi,
+  échoué, ou est-il en cours ?).
+*/
+
+:root {
+  /* Couleurs neutres (fond, texte, bordures) */
+  --color-bg: #f8fafc;
+  --color-surface: #ffffff;
+  --color-border: #e2e8f0;
+  --color-border-strong: #cbd5e1;
+  --color-text: #0f172a;
+  --color-text-muted: #64748b;
+  --color-text-faint: #94a3b8;
+
+  /* Couleur d'accent principale (actions, liens, éléments actifs) */
+  --color-primary: #2563eb;
+  --color-primary-hover: #1d4ed8;
+  --color-primary-bg: #eff6ff;
+
+  /* Couleurs de statut — alignées sur l'enum UploadStatus du backend */
+  --color-status-pending: #64748b;
+  --color-status-pending-bg: #f1f5f9;
+
+  --color-status-processing: #2563eb;
+  --color-status-processing-bg: #eff6ff;
+
+  --color-status-success: #16a34a;
+  --color-status-success-bg: #f0fdf4;
+
+  --color-status-partial: #d97706;
+  --color-status-partial-bg: #fffbeb;
+
+  --color-status-failed: #dc2626;
+  --color-status-failed-bg: #fef2f2;
+
+  /* Typographie */
+  --font-ui: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  --font-mono: 'JetBrains Mono', ui-monospace, 'SFMono-Regular', Menlo, monospace;
+
+  --font-size-xs: 0.75rem;
+  --font-size-sm: 0.875rem;
+  --font-size-base: 1rem;
+  --font-size-lg: 1.125rem;
+  --font-size-xl: 1.5rem;
+  --font-size-2xl: 1.875rem;
+
+  /* Espacements (échelle 4px) */
+  --space-1: 0.25rem;
+  --space-2: 0.5rem;
+  --space-3: 0.75rem;
+  --space-4: 1rem;
+  --space-6: 1.5rem;
+  --space-8: 2rem;
+  --space-12: 3rem;
+
+  /* Rayons et ombres — discrets, pas arrondis à outrance */
+  --radius-sm: 4px;
+  --radius-md: 6px;
+  --radius-lg: 8px;
+  --shadow-sm: 0 1px 2px rgba(15, 23, 42, 0.06);
+  --shadow-md: 0 4px 12px rgba(15, 23, 42, 0.08);
+
+  /* Layout */
+  --sidebar-width: 240px;
+  --topbar-height: 56px;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: var(--font-ui);
+  font-size: var(--font-size-base);
+  color: var(--color-text);
+  background-color: var(--color-bg);
+  -webkit-font-smoothing: antialiased;
+}
+
+code, pre, .mono {
+  font-family: var(--font-mono);
+}
+
+/* Accessibilité : focus clavier toujours visible */
+:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}

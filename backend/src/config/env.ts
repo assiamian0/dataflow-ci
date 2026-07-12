@@ -22,6 +22,9 @@ export const env = {
 
   frontendUrl: process.env.FRONTEND_URL ?? 'http://localhost:5173',
 
+  resendApiKey: process.env.RESEND_API_KEY ?? '',
+  resendFromEmail: process.env.RESEND_FROM_EMAIL ?? 'onboarding@resend.dev',
+
   maxFileSizeMb: Number(process.env.MAX_FILE_SIZE_MB ?? 10),
-  uploadDir: process.env.UPLOAD_DIR ?? './uploads',
+  uploadDir: process.env.UPLOAD_DIR ?? './warehouse',
 }

@@ -1,0 +1,50 @@
+services:
+  # ─────────────────────────────────────────
+  # Redis (queue BullMQ)
+  # ─────────────────────────────────────────
+  - type: redis
+    name: dataflow-ci-redis
+    plan: free
+    ipAllowList: [] # accessible uniquement depuis les autres services Render
+
+  # ─────────────────────────────────────────
+  # API Express
+  # ─────────────────────────────────────────
+  - type: web
+    name: dataflow-ci-api
+    runtime: node
+    rootDir: backend
+    plan: free
+    buildCommand: npm install && npm run prisma:generate && npm run build
+    startCommand: npm run start
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 4040
+      - key: DATABASE_URL
+        sync: false # à renseigner manuellement dans le dashboard Render (secret)
+      - key: JWT_SECRET
+        generateValue: true # Render génère une valeur aléatoire sécurisée
+      - key: JWT_EXPIRES_IN
+        value: 7d
+      - key: FRONTEND_URL
+        sync: false # URL Vercel du frontend, à renseigner une fois déployé
+      - key: MAX_FILE_SIZE_MB
+        value: 10
+      - key: UPLOAD_DIR
+        value: ./warehouse
+      - key: RESEND_API_KEY
+        sync: false # optionnel
+      - key: RESEND_FROM_EMAIL
+        value: onboarding@resend.dev
+      - key: REDIS_URL
+        fromService:
+          type: redis
+          name: dataflow-ci-redis
+          property: connectionString
+
+# Remarque : pas de service "worker" séparé. Le worker BullMQ tourne dans le
+# même processus que l'API (voir src/server.ts) car Render ne partage pas le
+# disque local entre deux services distincts, et le worker doit pouvoir lire
+# les fichiers que l'API vient d'écrire sur warehouse/.
