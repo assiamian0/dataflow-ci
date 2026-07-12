@@ -29,7 +29,7 @@ export async function sendUploadCompletedEmail(params: UploadCompletedEmailParam
     return
   }
 
-  const detailUrl = `${env.frontendUrl}/uploads/${params.uploadId}`
+  const detailUrl = `${env.frontendUrls[0]}/uploads/${params.uploadId}`
   const statusLabel = STATUS_LABELS[params.status] ?? params.status
 
   try {
