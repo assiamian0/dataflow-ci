@@ -116,3 +116,10 @@
   font-weight: 600;
   margin: 0 0 var(--space-4) 0;
 }
+
+.uploads-row__actions {
+  display: flex;
+  align-items: center;
+  gap: var(--space-6);
+  white-space: nowrap;
+}

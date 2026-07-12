@@ -4,6 +4,7 @@ import { ProtectedRoute } from '@/components/ProtectedRoute'
 import { DashboardPage } from '@/pages/DashboardPage'
 import { LoginPage } from '@/pages/LoginPage'
 import { SourcesPage } from '@/pages/SourcesPage'
+import { UploadDetailPage } from '@/pages/UploadDetailPage'
 import { UploadsPage } from '@/pages/UploadsPage'
 
 export function App() {
@@ -16,6 +17,7 @@ export function App() {
           <Route path="/" element={<DashboardPage />} />
           <Route path="/sources" element={<SourcesPage />} />
           <Route path="/uploads" element={<UploadsPage />} />
+          <Route path="/uploads/:uploadId" element={<UploadDetailPage />} />
         </Route>
       </Route>
 

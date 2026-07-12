@@ -171,34 +171,39 @@ export function UploadsPage() {
             </tr>
           </thead>
           <tbody>
-            {uploads.map((upload) => (
-              <tr key={upload.id}>
-                <td>
-                  <Link className="data-table-link" to={`/uploads/${upload.id}`}>
-                    {upload.original_name}
-                  </Link>
-                </td>
-                <td>
-                  <StatusBadge status={upload.status} />
-                </td>
-                <td>
-                  {upload.valid_lines} / {upload.total_lines}
-                </td>
-                <td>{new Date(upload.created_at).toLocaleString('fr-FR')}</td>
-                <td>
-                  {upload.valid_file_path && (
-                    <Button
-                      variant="secondary"
-                      onClick={() =>
-                        api.download(`/api/uploads/${upload.id}/download`, `valides-${upload.original_name}`)
-                      }
-                    >
-                      Télécharger
-                    </Button>
-                  )}
-                </td>
-              </tr>
-            ))}
+            {uploads.map((upload) => {
+              const hasErrors = upload.status === 'PARTIAL' || upload.status === 'FAILED'
+
+              return (
+                <tr key={upload.id}>
+                  <td>{upload.original_name}</td>
+                  <td>
+                    <StatusBadge status={upload.status} />
+                  </td>
+                  <td>
+                    {upload.valid_lines} / {upload.total_lines}
+                  </td>
+                  <td>{new Date(upload.created_at).toLocaleString('fr-FR')}</td>
+                  <td className="uploads-row__actions">
+                    {upload.valid_file_path && (
+                      <Button
+                        variant="secondary"
+                        onClick={() =>
+                          api.download(`/api/uploads/${upload.id}/download`, `valides-${upload.original_name}`)
+                        }
+                      >
+                        Télécharger
+                      </Button>
+                    )}
+                    {hasErrors && (
+                      <Link className="btn btn--danger-outline" to={`/uploads/${upload.id}`}>
+                        Voir détails erreurs
+                      </Link>
+                    )}
+                  </td>
+                </tr>
+              )
+            })}
           </tbody>
         </table>
       )}

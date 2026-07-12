@@ -42,11 +42,13 @@ src/
 ## État d'avancement
 
 - [x] Structure du projet et design system (tokens, composants de base)
-- [x] Navigation et layout général
-- [x] Pages Connexion / Tableau de bord / Sources / Fichiers (avec données de test)
-- [ ] Connexion aux vraies routes API du backend
-- [ ] Formulaire de création de source (avec définition du schéma)
-- [ ] Détail d'un fichier : rapport d'erreurs ligne par ligne
-- [ ] Graphiques du tableau de bord
+- [x] Navigation et layout général, protection des routes
+- [x] Connexion réelle aux routes API du backend (auth, sources, uploads, dashboard)
+- [x] Formulaire de création de source (colonnes et contraintes dynamiques)
+- [x] Modification du schéma d'une source (nouvelle version, pré-remplie)
+- [x] Upload multi-fichiers avec suivi de statut en direct (polling)
+- [x] Détail d'un fichier : rapport d'erreurs ligne par ligne + téléchargement des lignes valides
+- [x] Graphiques du tableau de bord (3 visualisations, recharts)
+- [ ] Support des fichiers Excel côté upload
 
 Voir `DESIGN.md` à la racine du repo pour l'architecture complète.

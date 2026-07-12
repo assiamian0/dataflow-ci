@@ -10,6 +10,7 @@
   font-size: var(--font-size-sm);
   font-weight: 500;
   cursor: pointer;
+  text-decoration: none;
   transition: background-color 0.12s ease, border-color 0.12s ease;
 }
 
@@ -41,4 +42,14 @@
 }
 .btn--danger:hover:not(:disabled) {
   background-color: #fee2e2;
+}
+
+.btn--danger-outline {
+  background-color: var(--color-surface);
+  border-color: #f0a8a8;
+  color: #dc4c4c;
+}
+.btn--danger-outline:hover:not(:disabled) {
+  background-color: #fef2f2;
+  border-color: #dc4c4c;
 }

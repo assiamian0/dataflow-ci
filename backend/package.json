@@ -12,6 +12,7 @@
     "prisma:generate": "prisma generate",
     "prisma:push": "prisma db push",
     "prisma:seed": "tsx prisma/seed.ts",
+    "prisma:seed2": "tsx prisma/seed2.ts",
     "lint": "eslint src --ext .ts",
     "test": "vitest run"
   },
@@ -29,6 +30,7 @@
     "ioredis": "^5.4.1",
     "jsonwebtoken": "^9.0.2",
     "multer": "^2.0.0",
+    "resend": "^4.0.0",
     "zod": "^3.23.8"
   },
   "devDependencies": {

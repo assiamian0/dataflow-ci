@@ -8,6 +8,7 @@ import { validationQueue } from '../config/queue'
 import type { ColumnSchema, RowConstraint } from '../types/schema.types'
 import { AppError } from '../middlewares/errorHandler'
 import { getActiveSchema, getSourceBySourceId } from './source.service'
+import { sendUploadCompletedEmail } from './notification.service'
 import { applyRowConstraints, validateRow, type RowError } from './validation.service'
 
 /** Crée l'enregistrement FileUpload et dépose un job de traitement dans la queue. */
@@ -73,7 +74,7 @@ export async function getUploadWithErrors(uploadId: string) {
 export async function processFileUpload(uploadId: string) {
   const upload = await prisma.fileUpload.findUnique({
     where: { id: uploadId },
-    include: { source: true, schema: true },
+    include: { source: { include: { user: true } }, schema: true },
   })
 
   if (!upload) return
@@ -83,7 +84,10 @@ export async function processFileUpload(uploadId: string) {
   const columns = upload.schema.columns as unknown as ColumnSchema[]
   const constraints = (upload.schema.row_constraints as unknown as RowConstraint[]) ?? []
 
-  const fileContent = fs.readFileSync(upload.file_path, 'utf-8')
+  // Certains fichiers CSV (souvent exportés depuis Excel) commencent par un
+  // BOM UTF-8 invisible, qui casserait le nom de la première colonne du
+  // header s'il n'est pas retiré (ex: "\uFEFFdate_vente" au lieu de "date_vente").
+  const fileContent = fs.readFileSync(upload.file_path, 'utf-8').replace(/^\uFEFF/, '')
 
   let records: Record<string, string>[]
   try {
@@ -97,6 +101,16 @@ export async function processFileUpload(uploadId: string) {
     await prisma.fileUpload.update({
       where: { id: uploadId },
       data: { status: 'FAILED', total_lines: 0, valid_lines: 0, invalid_lines: 0 },
+    })
+    await sendUploadCompletedEmail({
+      to: upload.source.user.email,
+      originalName: upload.original_name,
+      sourceName: upload.source.name,
+      status: 'FAILED',
+      totalLines: 0,
+      validLines: 0,
+      invalidLines: 0,
+      uploadId,
     })
     return
   }
@@ -164,5 +178,18 @@ export async function processFileUpload(uploadId: string) {
       invalid_lines: invalidCount,
       valid_file_path: validFilePath,
     },
+  })
+
+  // 7. Notification par email — ne doit jamais faire échouer le traitement
+  // du fichier si l'envoi échoue (voir notification.service.ts).
+  await sendUploadCompletedEmail({
+    to: upload.source.user.email,
+    originalName: upload.original_name,
+    sourceName: upload.source.name,
+    status,
+    totalLines: total,
+    validLines: validCount,
+    invalidLines: invalidCount,
+    uploadId,
   })
 }
