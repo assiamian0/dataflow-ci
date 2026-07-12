@@ -26,20 +26,20 @@ npm run prisma:seed   # charge les 2 sources officielles (Orange CI, Banque Atla
 
 ## Lancer en développement
 
-Il faut **3 processus en parallèle** :
-
 ```bash
 # Terminal 1 — Redis (si pas déjà lancé en local)
 redis-server
 
-# Terminal 2 — API
+# Terminal 2 — API + worker (le worker tourne dans le même processus)
 npm run dev
-
-# Terminal 3 — Worker de validation
-npm run worker:dev
 ```
 
-L'API démarre par défaut sur `http://localhost:4000`.
+L'API démarre par défaut sur `http://localhost:4000`. Le worker de validation démarre automatiquement avec (voir `src/server.ts`).
+
+Pour lancer le worker **séparément** en développement (utile pour isoler ses logs) :
+```bash
+npm run worker:dev
+```
 
 ## Lancer les tests
 
