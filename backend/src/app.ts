@@ -11,7 +11,7 @@ import { dashboardRouter } from './routes/dashboard.routes'
 
 export const app = express()
 
-app.use(cors({ origin: env.frontendUrl }))
+app.use(cors({ origin: env.frontendUrls, credentials: true }))
 app.use(express.json())
 
 // Routes

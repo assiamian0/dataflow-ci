@@ -20,8 +20,10 @@ export const env = {
   jwtSecret: requireEnv('JWT_SECRET'),
   jwtExpiresIn: process.env.JWT_EXPIRES_IN ?? '7d',
 
-  frontendUrl: process.env.FRONTEND_URL ?? 'http://localhost:5173',
-
+  frontendUrls: (process.env.FRONTEND_URL ?? 'http://localhost:5173')
+  .split(',')
+  .map((url) => url.trim()),
+  
   resendApiKey: process.env.RESEND_API_KEY ?? '',
   resendFromEmail: process.env.RESEND_FROM_EMAIL ?? 'onboarding@resend.dev',
 
