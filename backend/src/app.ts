@@ -11,7 +11,16 @@ import { dashboardRouter } from './routes/dashboard.routes'
 
 export const app = express()
 
-app.use(cors({ origin: env.frontendUrls, credentials: true }))
+app.use(cors({
+  origin: (origin, callback) => {
+    if (!origin || env.frontendUrls.includes(origin)) {
+      callback(null, true)
+    } else {
+      callback(new Error('Non autorisé par CORS'))
+    }
+  },
+  credentials: true
+}))
 app.use(express.json())
 
 // Routes
