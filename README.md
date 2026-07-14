@@ -51,3 +51,6 @@ Le fichier [`DESIGN.md`](./DESIGN.md) contient :
 - [ ] Support Excel
 - [ ] Webhooks sortants
 - [ ] Déploiement (Vercel + Render + MongoDB Atlas)
+
+## Connexion au site web
+- Identifiants : assiamian001@gmail.com / JumiaTest2026!
