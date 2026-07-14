@@ -54,3 +54,6 @@ Le fichier [`DESIGN.md`](./DESIGN.md) contient :
 
 ## Connexion au site web
 - Identifiants : assiamian001@gmail.com / JumiaTest2026!
+
+## URL de l'application 
+- https://dataflow-ci-jade.vercel.app/
