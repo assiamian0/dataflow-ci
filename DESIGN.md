@@ -818,17 +818,17 @@ Les couleurs des statuts reprennent exactement celles du `StatusBadge` utilisé 
 - Upload de fichiers CSV (multer, sélection multiple) avec traitement asynchrone (BullMQ + Redis)
 - Moteur de validation : vérification colonne par colonne (type, format, pattern, min/max, enum, obligatoire) + contraintes cross-lignes (unicité) et cross-colonnes (comparaison)
 - Rapport d'ingestion complet : page de détail par fichier avec le tableau des erreurs (ligne, colonne, type, raison), export du CSV des lignes valides téléchargeable depuis l'interface
-- Notifications par email (Resend) : envoyées au propriétaire de la source à la fin de chaque traitement, sans jamais bloquer le traitement en cas d'échec d'envoi
 - Tableau de bord connecté aux vraies données : compteurs, 3 visualisations (statuts, fichiers par source, types d'erreurs), activité récente
 - Multi-tenant basique : chaque source est rattachée à un `user_id`, toutes les requêtes (sources, uploads, dashboard) sont scopées à l'utilisateur connecté — un client de DataFlow CI ne voit que ses propres données
 - Tests automatisés : 25 tests unitaires sur le moteur de validation et les validateurs zod (la logique métier la plus critique)
 - CI GitHub Actions : type-check + tests backend, build frontend à chaque push/PR
 - Frontend : connexion réelle, protection de toutes les routes (redirection si non connecté), déconnexion, formulaire de création de source avec colonnes et contraintes dynamiques, modification du schéma avec formulaire pré-rempli, suivi de statut en direct (polling)
+- Déploiement réel (Vercel / Render / Atlas configurés en local pour l'instant, pas encore mis en ligne)
 
 **❌ Pas encore fait**
 - Upload de fichiers Excel (`.xlsx`/`.xls`) — seul le CSV est lu par le moteur de validation actuellement
 - Webhooks sortants
-- Déploiement réel (Vercel / Render / Atlas configurés en local pour l'instant, pas encore mis en ligne)
+- Notifications par email (Resend) : envoyées au propriétaire de la source à la fin de chaque traitement, sans jamais bloquer le traitement en cas d'échec d'envoi
 - Tests d'intégration (les tests actuels sont unitaires, sur la logique pure, pas sur les routes HTTP avec base de données)
 
 ---
